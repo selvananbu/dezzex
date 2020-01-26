@@ -24,9 +24,6 @@ export default class AccidentFinalDetails extends Component {
     }
     
 
-    onAnimationComplete(){
-        this.setState({isloading:false});
-    }
     componentDidMount(){
         var self = this;
         if(this.props.image !== undefined){
@@ -42,7 +39,7 @@ export default class AccidentFinalDetails extends Component {
             bodyFormData.append('file', photo); 
             axios({
                 method: 'post',
-                url: 'http://54.172.124.216:4000/main/upload',
+                url: 'http://54.172.124.216:4000/mains/upload',
                 data: bodyFormData,
                 })
                 .then(function (response) {
@@ -50,15 +47,28 @@ export default class AccidentFinalDetails extends Component {
                     var data = response.data.data;
                    if(data !== undefined){
                        console.log(data);
-                       var imageUrl = data.name;
+                       var imageUrl = { uri: data.image};
+                       var damageData = [];
                        axios.get(data.json)
                             .then(function (response) {
                                 // handle success
                                 
                                 if(response.status === 200){
                                     var data = response.data
-                                    console.log(JSON.stringify(data));
-                                    self.setState({data:JSON.stringify(data),image:imageUrl})
+                                    Object.keys(data).map((key,idx) =>{
+                                        var damage = {
+                                            part:key,
+                                            issue:data[key]
+                                        }
+                                        damageData.push(damage)
+                                    })
+
+                                    console.log(damageData);
+
+                                    // if(JSON.stringify(data).length > 0){
+                                    // console.log(JSON.stringify(data));
+                                    self.setState({data:damageData,image:imageUrl,isloading:false})
+                                    // }
                                  
                                 }
                             })
@@ -77,36 +87,21 @@ export default class AccidentFinalDetails extends Component {
                     //handle error
                     console.log(response);
                 });
-            // const params = new URLSearchParams();
-            // params.append('file', this.props.image[0])
-
-            // axios.post("http://54.172.124.216:4000/main/upload",{
-            //    file: fileName.uri.uri
-            // }).then(function(response){
-            //     console.log('====================================');
-            //     console.log(response);
-            //     console.log('====================================');
-            //     this.setState({isloading:false});
-            // })
-            // .catch(function (response) {
-            //         //handle error
-            //         console.log(response);
-            //     });
         }
 
        
     
 // First set up animation 
-        Animated.loop(
-            Animated.timing(
-            this.spinValue,
-        {
-            toValue: 1,
-            duration: 20000,
-            easing: Easing.linear,
-            useNativeDriver: true
-        }
-        ).start(this.onAnimationComplete.bind(this)))
+        // Animated.loop(
+        //     Animated.timing(
+        //     this.spinValue,
+        // {
+        //     toValue: 1,
+        //     duration: 20000,
+        //     easing: Easing.linear,
+        //     useNativeDriver: true
+        // }
+        // ).start(this.onAnimationComplete.bind(this)))
     }
 
     onContinuePressed(){
@@ -122,34 +117,72 @@ export default class AccidentFinalDetails extends Component {
             outputRange: ['0deg', '360deg']
           })
 
+          console.log(this.state);
+          
           
         return (
             <View style={styles.container}>
-                      <View style={{height:height(20),alignItems:"center",justifyContent:"center"}}>
-                <Text style={{fontSize:18,color:"#4C92B7",fontWeight:"bold"}}> Starting analysing the damage </Text>
-                <Text style={{fontSize:16,color:"#4C92B7"}}> Please wait. It won't take long </Text>
-                </View>
+                    
 
                 <View style={{height:height(80)}}>
                     {this.state.isloading 
                     ?
+                    <View style={{height:height(90),width:width(99),alignItems:"center"}}>
+                <View style={{height:height(20),alignItems:"center",justifyContent:"center"}}>
+                <Text style={{fontSize:18,color:"#4C92B7",fontWeight:"bold"}}> Starting analysing the damage </Text>
+                <Text style={{fontSize:16,color:"#4C92B7"}}> Please wait. It won't take long </Text>
+                </View>
+                <View style={{height:height(40),width:width(99),alignItems:"center",justifyContent:"center"}}>
                     <ProgressBarAndroid/>
+                    </View>
+                    </View>
                 // <Animated.Image source={require("../asset/loading.png")}   style={{transform: [{rotate: spin}] }}
                 // width={width(75)} height={height(40)} resizeMode="contain"/>
                 :
+
                 <View style={{alignItems:"center",width:width(99),height:height(80)}}>
               
-                <Image source={{uri:this.state.image}}  style={{width:width(80),height:height(40)}} resizeMode="contain"/>
-                <View style={{flexDirection:"column",width:width(90),height:height(10),marginTop:height(2)}}>
-                    <View style={{width:width(30),height:height(10)}}>
+                <Image source={this.state.image}  style={{width:width(80),height:height(40)}} resizeMode="contain"/>
+                <View style={{flexDirection:"column",width:width(90),height:height(30),marginTop:height(2)}}>
+                    <View style={{width:width(90),height:height(10),alignItems:"center",flexDirection:"row"}}>
+                        <View style={{width:width(40),alignItems:"center"}}>
+                        <Text style={{fontSize:18,fontWeight:"bold"}}>
+                            Part
+                        </Text>
+                        </View>
+                        <View style={{width:width(40),alignItems:"center"}}>
                         <Text style={{fontSize:18,fontWeight:"bold"}}>
                             Damage Type
                         </Text>
+                        </View>
                     </View>
-                    <View style={{width:width(99),height:height(50)}}>
-                    <Text style={{fontSize:16}}>
-                                        {this.state.data}
+                    <View style={{width:width(90),height:height(20),alignItems:"center"}}>
+                    {this.state.data.map((val,idx) =>{
+                        return(
+                                <View key={idx} style={{flexDirection:"row",width:width(90),alignItems:"center"}}>
+                                <View style={{width:width(40),height:height(5),alignItems:"center"}}>
+                                <Text style={{fontSize:16}}>
+                                        {val["part"]}
                                 </Text>
+                                </View>
+                                <ScrollView showsVerticalScrollIndicator={false} style={{flexDirection:"column",width:width(40),height:height(5),marginLeft:width(10)}}>
+                                {val["issue"].map((innerval,inneridx) =>{
+                                    return(
+                                        
+                                        <Text style={{fontSize:16}} key={inneridx}>
+                                        {innerval}
+                                        </Text>
+                                        
+                                    )
+                                })
+                              
+                                }
+                                </ScrollView>
+                                </View>
+                        )
+                    })
+          
+                        }
                         </View>
                     {/* {this.state.damageIndex === 1
                     ?

@@ -67,7 +67,7 @@ const App = () => {
          <Scene key="accideentfinaldetails"
        component={AccidentFinalDetails}
        renderTitle={<View style={{width:width(70),alignItems:"center",justifyContent:"center"}}>
-         <Text style={{fontSize:16,color:"#4C92B7",fontWeight:"bold"}}>Attachement Details</Text>
+         <Text style={{fontSize:16,color:"#4C92B7",fontWeight:"bold"}}>Damage Analayser</Text>
          </View>}
       />
            <Scene key="anotherdriver"
